@@ -20,7 +20,7 @@ public:
     Card() {
         suits = Clubs;
         number = 0;
-        description = "Error!";
+        description = "Error! 2";
     }
 
     void setDescription(string str){
@@ -180,7 +180,7 @@ void Card::setDate(int suit1, int num) {
             }
             break;
         default:
-            cout << "Error!";
+            cout << "Error! 1";
     }
 }
 

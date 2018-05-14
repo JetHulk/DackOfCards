@@ -21,6 +21,39 @@ public:
         name = str;
     }
 
+    bool availability(int num, Suit suit){
+
+        if(findClubTwo() !=-1 && findClubTwo()==num && played[num]==false){
+            played[findClubTwo()]=true;
+            return true;
+        }
+
+        if(findClubTwo()!=-1 && findClubTwo()!=num && !played[num]){
+            cout << "You have to go with Club 2!" << endl;
+            return false;
+        }
+
+        int canPlay = 0;
+        if(played[num]) {
+            cout << "Choose the card that is not used yet!" << endl;
+            return false;
+        }
+
+        for(int i=0; i<13; i++){
+            if(hand[i].getSuits()==suit && played[i]==false){
+                canPlay++;
+            }
+        }
+
+        if(canPlay!=0 && hand[num].getSuits()!= suit){
+            cout << "Use the right suit!" << endl;
+            return false;
+        }
+
+        played[num]=true;
+        return true;
+    }
+
     void setName(string str) {
         name = str;
     }
@@ -68,7 +101,11 @@ public:
         cout << "My Hand: " << endl;
         cout << "----------" << endl;
         for (int i = 0; i < 13; i++) {
-            cout << i + 1 << ": " << hand[i].getDescription() << endl;
+            cout << i + 1 << ": ";
+            if(!played[i])
+                cout << hand[i].getDescription() << endl;
+            else
+                cout << endl;
         }
     }
 
@@ -143,6 +180,7 @@ int main() {
                         Player("Lady Gaga",0),
                         Player("Elton John",0)};
 
+
     int num=0;
     for(int i=0; i<52; i++){
         people[0].addCard(desk, num, i);
@@ -155,6 +193,9 @@ int main() {
         num++;
     }
 
+    for(int i=0; i<4; i++){
+        people[i].sortHand();
+    }
 
     displayPlayers(0, 0, 0, 0, 0, 0, 0, 0, 0);
     cout << endl;
@@ -162,7 +203,7 @@ int main() {
     int oneR = 0, twoR=0, threeR=0, fourR=0;
 
 
-    int choice;
+    int choice, yourChoice;
     int firstPlay;
     Suit suit = Clubs;
     for(int i=0; i<4; i++){
@@ -176,16 +217,47 @@ int main() {
         cout << "Round " << u << endl;
 
         firstPlay=choice;
-        played[0] = people[choice].playCard(suit, true);
+        if(people[choice].getName()=="Me"){
+            people[choice].displayHand();
+            cout << "Your play? ";
+            cin>>yourChoice;
+            while(!people[choice].availability(yourChoice-1, suit)){
+                cout << "Your play?";
+                cin>>yourChoice;
+            }
+
+            played[0] = people[choice].hand[yourChoice-1];
+
+        }
+        else
+            played[0] = people[choice].playCard(suit, true);
+
         suit = played[0].getSuits();
+        cout << played[0].getDescription() << endl;
         displayCard(people[choice], played[0].getDescription());
         playedName[0] = people[choice].getName();
         choice++;
+
         for (int i = 1; i < 4; i++) {
             if (choice > 3) {
                 choice = 0;
             }
-            played[i] = people[choice].playCard(suit, false);
+
+            if(people[choice].getName()=="Me"){
+                people[choice].displayHand();
+                cout << "Your play? ";
+                cin>>yourChoice;
+                while(!people[choice].availability(yourChoice -1, suit)){
+                    cout << "Your play?";
+                    cin>>yourChoice;
+                }
+
+                played[i] = people[choice].hand[yourChoice-1];
+
+            }
+            else
+                played[i] = people[choice].playCard(suit, false);
+
             displayCard(people[choice], played[i].getDescription());
             playedName[i] = people[i].getName();
             choice++;
@@ -223,8 +295,6 @@ int main() {
     }
 
 
-
-    //todo: it sometimes counts something else despite hearts.
 
 
     return 0;
