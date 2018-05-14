@@ -71,6 +71,46 @@ public:
         return description;
     }
 
+    Card isBigger(Suit suit, Card cards[]){
+        int count=0;
+        for(int i=0; i<4; i++){
+            if(cards[i].getSuits()==suit){
+                count++;
+            }
+        }
+
+        Card temp[count];
+        Card tempor;
+        int y=0;
+        for(int i=0; i<4; i++){
+            if(cards[i].getSuits()==suit){
+                temp[y]=cards[i];
+                y++;
+            }
+        }
+
+        tempor = temp[0];
+        for(int i=0; i<count-1; i++){
+            if(tempor.getNum() < temp[i+1].getNum()){
+                tempor=temp[i+1];
+            }
+        }
+
+        return tempor;
+
+    }
+
+    static int ifHearts(Card temps[]) {
+        int tempNum=0;
+        for(int i=0; i<4; i++) {
+            if (temps[i].getSuits() == Hearts)
+                tempNum++;
+            if(temps[i].getDescription() == "Club Queen")
+                tempNum+=13;
+        }
+        return tempNum;
+    }
+
 };
 
 void Card::setDate(int suit1, int num) {

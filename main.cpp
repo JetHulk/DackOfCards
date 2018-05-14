@@ -9,37 +9,43 @@
 
 using namespace std;
 
-class Player{
-    Card hand[13];
+class Player {
     bool played[13];
     int points;
     string name;
 public:
-    void setName(string str){
+    Card hand[13];
+
+    Player(string str, int num) {
+        points = num;
         name = str;
     }
 
-    void ifHearts(int choice){
-        if(hand[choice].getSuits()==Hearts)
-             points+=1;
+    void setName(string str) {
+        name = str;
     }
 
-    int getPoints(){
+    int getPoints() {
         return points;
     }
 
-    void setDescriptionHand(string str, int i){
+    void setPoints(int num){
+        points += num;
+    }
+
+    void setDescriptionHand(string str, int i) {
         hand[i].setDescription(str);
     }
-    string getName(){
+
+    string getName() {
         return name;
     }
 
-    string getDescriptionHand(int number){
+    string getDescriptionHand(int number) {
         return hand[number].getDescription();
     }
 
-    void sortHand(){
+    void sortHand() {
         Card temp;
         bool count = true;
         while (count) {
@@ -57,106 +63,168 @@ public:
 
     }
 
-    void displayHand(){
+    void displayHand() {
 
         cout << "My Hand: " << endl;
         cout << "----------" << endl;
         for (int i = 0; i < 13; i++) {
-            cout << i+1 << ": " << hand[i].getDescription() << endl;
+            cout << i + 1 << ": " << hand[i].getDescription() << endl;
         }
     }
 
-    void addCard(Desk& obj, int num, int numO){
+    void addCard(Desk &obj, int num, int numO) {
         hand[num].setDescription(obj.getCardDescription(numO));
         hand[num].setNum(obj.getCardNum(numO));
         hand[num].setSuit(obj.getCardSuit(numO));
     }
 
-    Card playCard(Suit lead, bool leader){
+    Card playCard(Suit lead, bool leader) {
 
-        for(int i=0; i<13; i++){
-            if(hand[i].getSuits()==lead)
+        if(findClubTwo()!=-1 && played[findClubTwo()]==false){
+            played[findClubTwo()]=true;
+            return hand[findClubTwo()];
         }
 
+        if (leader) {
+            for (int i = 0; i < 13; i++) {
+                if (played[i]==false) {
+                    played[i] = true;
+                    return hand[i];
+                }
+            }
+        } else {
+            for (int i = 0; i < 13; i++) {
+                if (hand[i].getSuits() == lead && played[i]==false) {
+                    played[i]=true;
+                    return hand[i];
+                }
+            }
+
+            for (int i = 0; i < 13; i++) {
+                if (played[i] ==false) {
+                    played[i]=true;
+                    return hand[i];
+                }
+            }
+        }
     }
 
-    int findClubTwo(){
+    int findClubTwo() {
 
-        for(int i=0; i<13; i++){
-            if(hand[i].getDescription() == "Club 2")
+        for (int i = 0; i < 13; i++) {
+            if (hand[i].getDescription() == "Club 2")
                 return i;
         }
         return -1;
 
     }
+
+    Suit getSuitHand(int num){
+      return hand[num].getSuits();
+    }
+
 };
 
 void displayPlayers(int, int, int, int, int, int, int, int, int);
 
-void displayCard(int, Player&);
+void displayCard(Player&, string cont);
 
 int main() {
 
     Desk desk;
+    Card played[4];
+    string playedName[4];
 
     desk.initialize();
     desk.shuffle();
 
-    Player one, two, three, four;
-    one.setName("Me");
-    two.setName("Snoop Dog");
-    three.setName("Lady Gaga");
-    four.setName("Elton John");
+    Player people[4] = {Player("Me",0),
+                        Player("Snoop Dog",0),
+                        Player("Lady Gaga",0),
+                        Player("Elton John",0)};
 
     int num=0;
     for(int i=0; i<52; i++){
-        one.addCard(desk, num, i);
+        people[0].addCard(desk, num, i);
         i++;
-        two.addCard(desk, num, i);
+        people[1].addCard(desk, num, i);
         i++;
-        three.addCard(desk, num, i);
+        people[2].addCard(desk, num, i);
         i++;
-        four.addCard(desk, num, i);
+        people[3].addCard(desk, num, i);
         num++;
     }
 
-    int choice;
 
     displayPlayers(0, 0, 0, 0, 0, 0, 0, 0, 0);
+    cout << endl;
 
-    int oneT = 0, twoT=0, threeT=0, fourT=0;
+    int oneR = 0, twoR=0, threeR=0, fourR=0;
 
-    cout << "Round " << 1 << endl;
 
-    if(one.findClubTwo() != -1){
-        choice = one.findClubTwo();
-        displayCard(choice, one);
-        one.displayHand();
-    } else if(two.findClubTwo() != -1){
-        choice = two.findClubTwo();
-        displayCard(choice, two);
-    } else if(three.findClubTwo()!=-1){
-        choice = three.findClubTwo();
-        displayCard(choice, three);
-    } else
-    {
-        choice = four.findClubTwo();
-        displayCard(choice, four);
+    int choice;
+    int firstPlay;
+    Suit suit = Clubs;
+    for(int i=0; i<4; i++){
+       if(people[i].findClubTwo()!=-1){
+           choice = i;
+       }
+   }
+
+
+    for(int u=1; u<=13; u++) {
+        cout << "Round " << u << endl;
+
+        firstPlay=choice;
+        played[0] = people[choice].playCard(suit, true);
+        suit = played[0].getSuits();
+        displayCard(people[choice], played[0].getDescription());
+        playedName[0] = people[choice].getName();
+        choice++;
+        for (int i = 1; i < 4; i++) {
+            if (choice > 3) {
+                choice = 0;
+            }
+            played[i] = people[choice].playCard(suit, false);
+            displayCard(people[choice], played[i].getDescription());
+            playedName[i] = people[i].getName();
+            choice++;
+
+        }
+        Card winnerCar;
+        int numCar;
+        winnerCar = winnerCar.isBigger(suit, played);
+
+        for (int i = 0; i < 4; i++) {
+            if (played[i].getDescription() == winnerCar.getDescription()) {
+                numCar = i;
+            }
+        }
+
+        choice = (firstPlay + numCar)%4;
+        int hearts = Card::ifHearts(played);
+        people[choice].setPoints(hearts);
+
+            oneR = people[0].getPoints() - oneR;
+            twoR = people[1].getPoints() - twoR;
+            threeR = people[2].getPoints() - threeR;
+            fourR = people[3].getPoints() - fourR;
+            displayPlayers(u, oneR, people[0].getPoints(), twoR, people[1].getPoints(), threeR, people[2].getPoints(),fourR
+                           , people[3].getPoints());
+
+        oneR = people[0].getPoints();
+        twoR = people[1].getPoints();
+        threeR = people[2].getPoints();
+        fourR = people[3].getPoints();
+
+        cout << endl;
+
 
     }
 
-    for(int i=1; i<=13; i++){
-
-        oneT +=one.getPoints();
-        twoT+=two.getPoints();
-        threeT+=three.getPoints();
-        fourT+=four.getPoints();
-        displayPlayers(i, one.getPoints(), oneT, two.getPoints(), twoT, three.getPoints(), threeT, four.getPoints(), fourT);
 
 
-    }
-
-
+    //todo: it sometimes counts something else despite hearts.
 
 
     return 0;
@@ -173,11 +241,10 @@ void displayPlayers(int round, int one, int totalOne, int two, int totalTwo, int
     cout << setw(28) << "Elton John" << left << four << "   " << totalFour << endl;
  }
 
-void displayCard(int choice, Player& firstOne){
+void displayCard(Player& firstOne, string const str){
 
-    cout << firstOne.getName() << ": " << firstOne.getDescriptionHand(choice) << endl;
-    firstOne.ifHearts(choice);
-    firstOne.setDescriptionHand(" ", choice);
+    cout << firstOne.getName() << ": " << str << endl;
+
 
 }
 
